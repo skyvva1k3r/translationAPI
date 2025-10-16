@@ -227,18 +227,18 @@
     <div class="container">
         <div class="header">
             <h1>🌐 Переводчик слов</h1>
-            <p>Переводите русские слова на английский</p>
+            <p>Переводите английские слова на русский</p>
         </div>
 
         <!-- Форма добавления перевода -->
         <div class="card">
             <form id="translationForm">
                 <div class="form-group">
-                    <label for="wordInput">Введите русское слово</label>
+                    <label for="wordInput">Введите английское слово</label>
                     <input 
                         type="text" 
                         id="wordInput" 
-                        placeholder="Например: привет"
+                        placeholder="Например: hello"
                         autocomplete="off"
                     >
                 </div>
@@ -308,13 +308,13 @@
                     // Обработка ошибок от сервера
                     showMessage(data.detail || 'Произошла ошибка при переводе', 'error');
                 } else if (data.status === 'success') {
-                    showMessage(`Перевод добавлен: ${data.word_en} → ${data.word_ru}`, 'success');
+                    showMessage(`Перевод добавлен: ${data.word_ru} → ${data.word_en}`, 'success');
                     wordInput.value = '';
                     // Обновляем список переводов
                     await fetchAllTranslations();
                 } else if (data.status === 'info') {
                     showMessage(
-                        `${data.message} ${data.translation.rus} → ${data.translation.eng}`, 
+                        `${data.message} ${data.translation.eng} → ${data.translation.rus}`, 
                         'info'
                     );
                 }
@@ -359,16 +359,16 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Русский</th>
                                 <th>Английский</th>
+                                <th>Русский</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${translations.map(t => `
                                 <tr>
                                     <td>${t.id}</td>
-                                    <td><strong>${t.rus}</strong></td>
-                                    <td>${t.eng}</td>
+                                    <td><strong>${t.eng}</strong></td>
+                                    <td>${t.rus}</td>
                                 </tr>
                             `).join('')}
                         </tbody>

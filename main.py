@@ -4,6 +4,18 @@ from sqlalchemy import create_engine, MetaData, Table, Column, Integer, Numeric,
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from deep_translator import (GoogleTranslator,
+                             ChatGptTranslator,
+                             MicrosoftTranslator,
+                             PonsTranslator,
+                             LingueeTranslator,
+                             MyMemoryTranslator,
+                             YandexTranslator,
+                             PapagoTranslator,
+                             DeeplTranslator,
+                             QcriTranslator,
+                             single_detection,
+                             batch_detection)
 load_dotenv()
 password = os.getenv("password")
 
@@ -30,20 +42,19 @@ async def show_API():
     return show()
 
 def translate(message):
+    message = message.capitalize()
     with engine.connect() as connection:
-        sql = text("SELECT * FROM translations WHERE rus = :message")
+        sql = text("SELECT * FROM translations WHERE eng = :message")
         result = connection.execute(sql, {"message" :  message})
         rows = result.fetchall()
     if rows:
         return {"status" : "info", "message" :"Translation already exists.", "translation" : {"rus" : rows[0][1], "eng" : rows[0][2]}}
     if not rows:
-        try: translate = requests.get(timeout=5, url=f"https://api.mymemory.translated.net/get?q={message}&langpair=en|ru").json()["responseData"]["translatedText"]
-        except requests.exceptions.ConnectionError:
-            raise HTTPException (status_code=400, detail="Translation failed. Connection error.")
+        translate = GoogleTranslator(source='en', target='ru').translate(f"{message}")
         if translate == message:
             raise HTTPException(status_code=400, detail = "Translation failed. Wrong word given.")
         with engine.connect() as connection:
-            sql = text("INSERT INTO public.translations(rus, eng) VALUES (:message, :translate);")
+            sql = text("INSERT INTO public.translations(eng, rus) VALUES (:message, :translate);")
             result = connection.execute(sql, {"message": message, "translate" : translate})
             connection.commit()
     return {"status" : "success", "word_en" : message, "word_ru" : translate}
@@ -59,6 +70,10 @@ def show():
         return {"status" : "success", "translations" : rows}
     else:
         return {"status" : "success", "message" : "Nothing translated yet."}
+
+
+print(translate("Hi"))
+
 
 from fastapi.middleware.cors import CORSMiddleware
 
