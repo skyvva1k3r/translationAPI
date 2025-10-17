@@ -1,8 +1,10 @@
 import os
 import requests
+import json
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, Numeric, VARCHAR, text, insert
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse  
 from pydantic import BaseModel
 from deep_translator import (GoogleTranslator,
                              ChatGptTranslator,
@@ -31,7 +33,7 @@ app = FastAPI()
 
 @app.get('/')
 async def root():
-    return ({"message": "Translations API is running. Use /add"})
+    return FileResponse('index(AI gen.).html')
 
 @app.post('/add')
 async def translate_API(message : Message):
@@ -50,7 +52,12 @@ def translate(message):
     if rows:
         return {"status" : "info", "message" :"Translation already exists.", "translation" : {"rus" : rows[0][1], "eng" : rows[0][2]}}
     if not rows:
-        translate = GoogleTranslator(source='en', target='ru').translate(f"{message}")
+        translate = []
+        translate.append((GoogleTranslator(source='en', target='ru').translate(f"{message}")).capitalize())
+        translate.append((MyMemoryTranslator(source='en-GB', target='ru-RU').translate(f"{message}")).capitalize())
+        translate.append((PonsTranslator(source='en', target='ru').translate(f"{message}")).capitalize())
+        translate = set(translate)
+        translate = ", ".join(translate)
         if translate == message:
             raise HTTPException(status_code=400, detail = "Translation failed. Wrong word given.")
         with engine.connect() as connection:
