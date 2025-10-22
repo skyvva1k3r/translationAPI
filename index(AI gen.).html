@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -59,7 +59,9 @@
             margin-bottom: 8px;
         }
 
-        input[type="text"] {
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
             width: 100%;
             padding: 12px 16px;
             font-size: 16px;
@@ -68,10 +70,12 @@
             transition: all 0.3s;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #000000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
         }
 
         .btn {
@@ -80,7 +84,7 @@
             font-size: 16px;
             font-weight: 600;
             color: white;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #000000 0%, #434343 100%);
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -89,7 +93,7 @@
 
         .btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
 
         .btn:disabled {
@@ -97,8 +101,11 @@
             cursor: not-allowed;
         }
 
-        .btn:active:not(:disabled) {
-            transform: translateY(0);
+        .btn-logout {
+            background: linear-gradient(135deg, #2d2d2d 0%, #5a5a5a 100%);
+            width: auto;
+            padding: 10px 20px;
+            font-size: 14px;
         }
 
         .message {
@@ -121,21 +128,21 @@
         }
 
         .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: #e8e8e8;
+            color: #1a1a1a;
+            border: 1px solid #d0d0d0;
         }
 
         .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: #f0f0f0;
+            color: #000000;
+            border: 1px solid #c0c0c0;
         }
 
         .message.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
+            background: #f5f5f5;
+            color: #2d2d2d;
+            border: 1px solid #d5d5d5;
         }
 
         .section-title {
@@ -179,6 +186,21 @@
             background-color: #f8f9fa;
         }
 
+        .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            transition: transform 0.2s;
+            opacity: 0.6;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -187,7 +209,7 @@
 
         .spinner {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid #000000;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -221,37 +243,113 @@
             animation: spin 0.8s linear infinite;
             margin-right: 8px;
         }
+
+        .hidden {
+            display: none;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+        }
+
+        .auth-switch a {
+            color: #000000;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-email {
+            color: #333;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌐 Переводчик слов</h1>
+            <h1>📖 Переводчик слов</h1>
             <p>Переводите английские слова на русский</p>
         </div>
 
+        <!-- Форма входа -->
+        <div id="loginCard" class="card">
+            <h2 class="section-title">Вход</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="example@mail.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Пароль</label>
+                    <input type="password" id="loginPassword" placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Войти</button>
+            </form>
+            <div id="loginMessage"></div>
+            <div class="auth-switch">
+                Нет аккаунта? <a id="showRegister">Зарегистрироваться</a>
+            </div>
+        </div>
+
+        <!-- Форма регистрации -->
+        <div id="registerCard" class="card hidden">
+            <h2 class="section-title">Регистрация</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" placeholder="example@mail.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Пароль</label>
+                    <input type="password" id="registerPassword" placeholder="Минимум 6 символов" required>
+                </div>
+                <button type="submit" class="btn" id="registerBtn">Зарегистрироваться</button>
+            </form>
+            <div id="registerMessage"></div>
+            <div class="auth-switch">
+                Уже есть аккаунт? <a id="showLogin">Войти</a>
+            </div>
+        </div>
+
+        <!-- Информация о пользователе -->
+        <div id="userInfo" class="user-info hidden">
+            <span class="user-email" id="userEmail"></span>
+            <button class="btn btn-logout" id="logoutBtn">Выйти</button>
+        </div>
+
         <!-- Форма добавления перевода -->
-        <div class="card">
+        <div id="translationCard" class="card hidden">
             <form id="translationForm">
                 <div class="form-group">
                     <label for="wordInput">Введите английское слово</label>
-                    <input 
-                        type="text" 
-                        id="wordInput" 
-                        placeholder="Например: hello"
-                        autocomplete="off"
-                    >
+                    <input type="text" id="wordInput" placeholder="Например: hello" autocomplete="off">
                 </div>
-                <button type="submit" class="btn" id="submitBtn">
-                    Перевести
-                </button>
+                <button type="submit" class="btn" id="submitBtn">Перевести</button>
             </form>
             <div id="messageContainer"></div>
         </div>
 
         <!-- Список переводов -->
-        <div class="card">
-            <h2 class="section-title">Все переводы</h2>
+        <div id="translationsCard" class="card hidden">
+            <h2 class="section-title">Мои переводы</h2>
             <div id="translationsContainer">
                 <div class="loading">
                     <div class="spinner"></div>
@@ -263,22 +361,135 @@
 
     <script>
         const API_URL = 'http://localhost:8000';
-        
-        const form = document.getElementById('translationForm');
-        const wordInput = document.getElementById('wordInput');
-        const submitBtn = document.getElementById('submitBtn');
-        const messageContainer = document.getElementById('messageContainer');
-        const translationsContainer = document.getElementById('translationsContainer');
+        let authToken = localStorage.getItem('authToken');
+        let userEmail = localStorage.getItem('userEmail');
 
-        // Загрузка всех переводов при загрузке страницы
-        window.addEventListener('DOMContentLoaded', fetchAllTranslations);
+        // Элементы DOM
+        const loginCard = document.getElementById('loginCard');
+        const registerCard = document.getElementById('registerCard');
+        const userInfo = document.getElementById('userInfo');
+        const translationCard = document.getElementById('translationCard');
+        const translationsCard = document.getElementById('translationsCard');
 
-        // Обработка отправки формы
-        form.addEventListener('submit', async (e) => {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const translationForm = document.getElementById('translationForm');
+
+        const showRegisterBtn = document.getElementById('showRegister');
+        const showLoginBtn = document.getElementById('showLogin');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Проверка авторизации при загрузке
+        window.addEventListener('DOMContentLoaded', () => {
+            if (authToken) {
+                showMainApp();
+            } else {
+                showAuth();
+            }
+        });
+
+        // Переключение между формами входа и регистрации
+        showRegisterBtn.addEventListener('click', () => {
+            loginCard.classList.add('hidden');
+            registerCard.classList.remove('hidden');
+        });
+
+        showLoginBtn.addEventListener('click', () => {
+            registerCard.classList.add('hidden');
+            loginCard.classList.remove('hidden');
+        });
+
+        // Регистрация
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const word = wordInput.value.trim();
-            
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            if (password.length < 6) {
+                showAuthMessage('registerMessage', 'Пароль должен быть минимум 6 символов', 'error');
+                return;
+            }
+
+            const registerBtn = document.getElementById('registerBtn');
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<div class="btn-loading"><div class="btn-spinner"></div>Регистрация...</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/reg`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showAuthMessage('registerMessage', 'Регистрация успешна! Теперь войдите', 'success');
+                    setTimeout(() => {
+                        registerCard.classList.add('hidden');
+                        loginCard.classList.remove('hidden');
+                    }, 1500);
+                } else {
+                    showAuthMessage('registerMessage', data.message, 'info');
+                }
+            } catch (error) {
+                showAuthMessage('registerMessage', 'Ошибка подключения к серверу', 'error');
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = 'Зарегистрироваться';
+            }
+        });
+
+        // Вход
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<div class="btn-loading"><div class="btn-spinner"></div>Вход...</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success' && data.token) {
+                    authToken = data.token;
+                    userEmail = email;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('userEmail', userEmail);
+                    showMainApp();
+                } else {
+                    showAuthMessage('loginMessage', data.message, 'info');
+                }
+            } catch (error) {
+                showAuthMessage('loginMessage', 'Ошибка подключения к серверу', 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Войти';
+            }
+        });
+
+        // Выход
+        logoutBtn.addEventListener('click', () => {
+            authToken = null;
+            userEmail = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userEmail');
+            showAuth();
+        });
+
+        // Перевод слова
+        translationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const word = document.getElementById('wordInput').value.trim();
+
             if (!word) {
                 showMessage('Введите слово для перевода', 'error');
                 return;
@@ -288,40 +499,43 @@
         });
 
         async function addTranslation(word) {
-            // Показываем индикатор загрузки
+            const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<div class="btn-loading"><div class="btn-spinner"></div>Перевод...</div>';
-            messageContainer.innerHTML = '';
+            document.getElementById('messageContainer').innerHTML = '';
 
             try {
                 const response = await fetch(`${API_URL}/add`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
                     },
                     body: JSON.stringify({ message: word }),
                 });
 
+                if (response.status === 401) {
+                    showMessage('Сессия истекла. Войдите снова', 'error');
+                    setTimeout(() => {
+                        logoutBtn.click();
+                    }, 1500);
+                    return;
+                }
+
                 const data = await response.json();
 
                 if (!response.ok) {
-                    // Обработка ошибок от сервера
                     showMessage(data.detail || 'Произошла ошибка при переводе', 'error');
                 } else if (data.status === 'success') {
-                    showMessage(`Перевод добавлен: ${data.word_ru} → ${data.word_en}`, 'success');
-                    wordInput.value = '';
-                    // Обновляем список переводов
+                    showMessage(`Перевод добавлен: ${data.word_en} → ${data.word_ru}`, 'success');
+                    document.getElementById('wordInput').value = '';
                     await fetchAllTranslations();
                 } else if (data.status === 'info') {
-                    showMessage(
-                        `${data.message} ${data.translation.eng} → ${data.translation.rus}`, 
-                        'info'
-                    );
+                    showMessage(`${data.message} ${data.translation.eng} → ${data.translation.rus}`, 'info');
                 }
             } catch (error) {
-                showMessage('Не удалось подключиться к серверу. Убедитесь, что FastAPI запущен на порту 8000', 'error');
+                showMessage('Не удалось подключиться к серверу', 'error');
             } finally {
-                // Возвращаем кнопку в исходное состояние
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Перевести';
             }
@@ -329,14 +543,24 @@
 
         async function fetchAllTranslations() {
             try {
-                const response = await fetch(`${API_URL}/all`);
+                const response = await fetch(`${API_URL}/all`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    logoutBtn.click();
+                    return;
+                }
+
                 const data = await response.json();
 
                 if (data.status === 'success') {
                     if (data.translations && data.translations.length > 0) {
                         renderTranslations(data.translations);
                     } else {
-                        translationsContainer.innerHTML = `
+                        document.getElementById('translationsContainer').innerHTML = `
                             <div class="empty-state">
                                 <p>Переводов пока нет. Добавьте первый перевод!</p>
                             </div>
@@ -344,9 +568,9 @@
                     }
                 }
             } catch (error) {
-                translationsContainer.innerHTML = `
+                document.getElementById('translationsContainer').innerHTML = `
                     <div class="empty-state">
-                        <p style="color: #dc3545;">Не удалось загрузить переводы. Проверьте подключение к серверу.</p>
+                        <p style="color: #dc3545;">Не удалось загрузить переводы</p>
                     </div>
                 `;
             }
@@ -358,37 +582,99 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>№</th>
                                 <th>Английский</th>
                                 <th>Русский</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${translations.map(t => `
+                            ${translations.map((t, index) => `
                                 <tr>
-                                    <td>${t.id}</td>
+                                    <td>${index + 1}</td>
                                     <td><strong>${t.eng}</strong></td>
                                     <td>${t.rus}</td>
+                                    <td>
+                                        <button class="delete-btn" onclick="deleteTranslation('${t.eng}')" title="Удалить">
+                                            🗑️
+                                        </button>
+                                    </td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
                 </div>
             `;
+            document.getElementById('translationsContainer').innerHTML = tableHTML;
+        }
+
+        async function deleteTranslation(word) {
+            if (!confirm(`Удалить перевод для слова "${word}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/del`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ message: word }),
+                });
+
+                if (response.status === 401) {
+                    alert('Сессия истекла. Войдите снова');
+                    logoutBtn.click();
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    await fetchAllTranslations();
+                } else {
+                    alert('Ошибка при удалении');
+                }
+            } catch (error) {
+                alert('Не удалось подключиться к серверу');
+            }
+        }
+
+        function showAuth() {
+            loginCard.classList.remove('hidden');
+            registerCard.classList.add('hidden');
+            userInfo.classList.add('hidden');
+            translationCard.classList.add('hidden');
+            translationsCard.classList.add('hidden');
+        }
+
+        function showMainApp() {
+            loginCard.classList.add('hidden');
+            registerCard.classList.add('hidden');
+            userInfo.classList.remove('hidden');
+            translationCard.classList.remove('hidden');
+            translationsCard.classList.remove('hidden');
             
-            translationsContainer.innerHTML = tableHTML;
+            document.getElementById('userEmail').textContent = userEmail;
+            fetchAllTranslations();
         }
 
         function showMessage(text, type) {
-            messageContainer.innerHTML = `
-                <div class="message ${type}">
-                    ${text}
-                </div>
+            document.getElementById('messageContainer').innerHTML = `
+                <div class="message ${type}">${text}</div>
             `;
-            
-            // Автоматически скрываем сообщение через 5 секунд
             setTimeout(() => {
-                messageContainer.innerHTML = '';
+                document.getElementById('messageContainer').innerHTML = '';
+            }, 5000);
+        }
+
+        function showAuthMessage(containerId, text, type) {
+            document.getElementById(containerId).innerHTML = `
+                <div class="message ${type}">${text}</div>
+            `;
+            setTimeout(() => {
+                document.getElementById(containerId).innerHTML = '';
             }, 5000);
         }
     </script>
