@@ -1,4 +1,5 @@
 import os
+import random
 import requests
 import json
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, Numeric, VARCHAR, text, insert
@@ -88,7 +89,23 @@ async def registration(user : User):
             sql = text("INSERT INTO public.users(email, password) VALUES (:email, :password);")
             result = connection.execute(sql, {"email": user.email, "password" : h})
             connection.commit()
-        return {"status" : "success", "message" : "Account successfully created."}
+        return {"status" : "success", "message" : "Account successfully created. "}
+    
+@app.get('/profile')
+async def profile_API(authorization : str = Header(None)):
+    decoded = jwt.decode(authorization.replace("Bearer ", ""), secret, algorithms=["HS256"])
+    user_id = decoded["user_id"]
+    data = []
+    with engine.connect() as connection:
+        sql = text("SELECT COUNT(*) FROM translations WHERE user_id = :user_id")
+        result = connection.execute(sql, {"user_id" : user_id})
+        rows = result.fetchall()
+        data.append(rows[0][0])
+        sql = text("SELECT created_at FROM users WHERE id = :user_id")
+        result = connection.execute(sql, {"user_id" : user_id})
+        rows = result.fetchall()
+        data.append(rows[0][0])
+    return {"status" : "success", "message" : "Data successfully received.", "data" : data}
 
 @app.post('/auth')
 async def auth(user : User):

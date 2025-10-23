@@ -280,6 +280,31 @@
             color: #333;
             font-weight: 600;
         }
+
+        .user-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -331,7 +356,19 @@
 
         <!-- Информация о пользователе -->
         <div id="userInfo" class="user-info hidden">
-            <span class="user-email" id="userEmail"></span>
+            <div>
+                <span class="user-email" id="userEmail"></span>
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="translationsCount">0</span>
+                        <span class="stat-label">переводов</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="memberSince">-</span>
+                        <span class="stat-label">с нами</span>
+                    </div>
+                </div>
+            </div>
             <button class="btn btn-logout" id="logoutBtn">Выйти</button>
         </div>
 
@@ -530,6 +567,7 @@
                     showMessage(`Перевод добавлен: ${data.word_en} → ${data.word_ru}`, 'success');
                     document.getElementById('wordInput').value = '';
                     await fetchAllTranslations();
+                    await fetchProfileStats();
                 } else if (data.status === 'info') {
                     showMessage(`${data.message} ${data.translation.eng} → ${data.translation.rus}`, 'info');
                 }
@@ -573,6 +611,35 @@
                         <p style="color: #dc3545;">Не удалось загрузить переводы</p>
                     </div>
                 `;
+            }
+        }
+
+        async function fetchProfileStats() {
+            try {
+                const response = await fetch(`${API_URL}/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (result.status === 'success' && result.data) {
+                    const translationsCount = result.data[0];
+                    const createdAt = new Date(result.data[1]);
+                    
+                    document.getElementById('translationsCount').textContent = translationsCount;
+                    
+                    // Форматируем дату
+                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    document.getElementById('memberSince').textContent = createdAt.toLocaleDateString('ru-RU', options);
+                }
+            } catch (error) {
+                console.error('Failed to fetch profile stats:', error);
             }
         }
 
@@ -633,6 +700,7 @@
 
                 if (data.status === 'success') {
                     await fetchAllTranslations();
+                    await fetchProfileStats();
                 } else {
                     alert('Ошибка при удалении');
                 }
@@ -658,6 +726,7 @@
             
             document.getElementById('userEmail').textContent = userEmail;
             fetchAllTranslations();
+            fetchProfileStats();
         }
 
         function showMessage(text, type) {
